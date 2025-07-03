@@ -26,7 +26,7 @@ const io = socketIo(server, {
 });
 
 // Database connection
-mongoose.connect(process.env.MONGODB_URI , {
+mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
@@ -54,8 +54,24 @@ app.use('/api/versions', versionRoutes);
 
 // Socket.io connection handling
 io.on('connection', (socket) => {
-  console.log('User connected:', socket.id);
-  socketHandlers(io, socket);
+  // Set a timeout for authentication
+  const authTimeout = setTimeout(() => {
+    socket.emit('authentication-error', { message: 'Authentication timeout' });
+    socket.disconnect();
+  }, 5000); // 5 seconds to authenticate
+
+  // Listen for authentication
+  socket.on('authenticate', async (token) => {
+    clearTimeout(authTimeout);
+    // Pass the socket and io to your socketHandlers
+    // Your socketHandlers should handle authentication and log only authenticated users
+    socketHandlers(io, socket, token);
+  });
+
+  // Optionally, handle disconnects
+  socket.on('disconnect', () => {
+    // You can log or clean up here if needed
+  });
 });
 
 // Error handling middleware

@@ -2,11 +2,11 @@ const express = require('express');
 const router = express.Router();
 const {
   createDocument,
-  getUserDocuments,
   getDocument,
   updateDocument,
   deleteDocument,
-  addCollaborator
+  addCollaborator,
+  getAllDocuments
 } = require('../controllers/documentController');
 const authMiddleware = require('../middleware/auth');
 
@@ -17,7 +17,7 @@ router.use(authMiddleware);
 router.post('/', createDocument);
 
 
-router.get('/', getUserDocuments);
+router.get('/', getAllDocuments);
 
 
 router.get('/:id', getDocument);

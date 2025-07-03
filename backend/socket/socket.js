@@ -9,16 +9,18 @@ const socketHandlers = (io, socket) => {
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
       const user = await User.findById(decoded.userId).select('-password');
-      
+
       if (user) {
         socket.userId = user._id.toString();
         socket.username = user.username;
         socket.emit('authenticated', { user: { id: user._id, username: user.username } });
       } else {
         socket.emit('authentication-error', { message: 'Invalid token' });
+        socket.disconnect();
       }
     } catch (error) {
       socket.emit('authentication-error', { message: 'Invalid token' });
+      socket.disconnect();
     }
   });
 
@@ -31,7 +33,7 @@ const socketHandlers = (io, socket) => {
       }
 
       const document = await Document.findById(documentId);
-      
+
       if (!document) {
         socket.emit('error', { message: 'Document not found' });
         return;
@@ -39,8 +41,8 @@ const socketHandlers = (io, socket) => {
 
       // Check if user has access
       const hasAccess = document.owner.toString() === socket.userId ||
-                       document.collaborators.some(collab => collab.user.toString() === socket.userId) ||
-                       document.isPublic;
+        document.collaborators.some(collab => collab.user.toString() === socket.userId) ||
+        document.isPublic;
 
       if (!hasAccess) {
         socket.emit('error', { message: 'Access denied' });
@@ -84,6 +86,14 @@ const socketHandlers = (io, socket) => {
         activeUsers: updatedDoc.activeUsers
       });
 
+      // Send the latest document content to the joining user
+      socket.emit('document-updated', {
+        content: document.content,
+        userId: 'system',
+        username: 'System',
+        timestamp: new Date()
+      });
+
       // Send current active users to the joining user
       socket.emit('active-users', updatedDoc.activeUsers);
 
@@ -101,7 +111,10 @@ const socketHandlers = (io, socket) => {
         return;
       }
 
-      const { content, selection } = data;
+      const { content } = data;
+
+      // Sanitize content (optional)
+      if (typeof content !== "string") return;
 
       // Update document in database
       await Document.findByIdAndUpdate(socket.currentDocument, {
@@ -110,10 +123,9 @@ const socketHandlers = (io, socket) => {
         lastModified: new Date()
       });
 
-      // Broadcast changes to other users in the room
-      socket.to(`doc-${socket.currentDocument}`).emit('document-updated', {
+      // Broadcast changes to other users in the room (not to the sender)
+      socket.broadcast.to(`doc-${socket.currentDocument}`).emit('document-updated', {
         content,
-        selection,
         userId: socket.userId,
         username: socket.username,
         timestamp: new Date()
@@ -125,7 +137,7 @@ const socketHandlers = (io, socket) => {
     }
   });
 
-  // Handle cursor position updates
+  // Handle cursor position updates (optional, not used with textarea)
   socket.on('cursor-position', (data) => {
     if (socket.currentDocument) {
       socket.to(`doc-${socket.currentDocument}`).emit('cursor-update', {
@@ -137,7 +149,7 @@ const socketHandlers = (io, socket) => {
     }
   });
 
-  // Handle auto-save
+  // Handle auto-save (optional)
   socket.on('auto-save', async (data) => {
     try {
       if (!socket.userId || !socket.currentDocument) {
@@ -174,7 +186,7 @@ const socketHandlers = (io, socket) => {
     }
   });
 
-  // Handle typing indicators
+  // Handle typing indicators (optional)
   socket.on('typing-start', () => {
     if (socket.currentDocument) {
       socket.to(`doc-${socket.currentDocument}`).emit('user-typing', {

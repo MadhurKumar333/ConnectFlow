@@ -4,13 +4,11 @@ const Version = require('../models/versionModel');
 // Create new document
 const createDocument = async (req, res) => {
   try {
-    const { title, content = '', isPublic = false } = req.body;
+    const { title} = req.body;
 
     const document = new Document({
       title,
-      content,
       owner: req.user.id,
-      isPublic,
       lastModifiedBy: req.user.id
     });
 
@@ -19,7 +17,6 @@ const createDocument = async (req, res) => {
     // Create initial version
     const version = new Version({
       documentId: document._id,
-      content,
       title,
       version: 1,
       createdBy: req.user.id,
@@ -28,12 +25,8 @@ const createDocument = async (req, res) => {
 
     await version.save();
 
-    await document.populate('owner', 'username email');
     
-    res.status(201).json({
-      message: 'Document created successfully',
-      document
-    });
+    res.status(201).json(document);
   } catch (error) {
     console.error('Create document error:', error);
     res.status(500).json({ message: 'Server error while creating document' });
@@ -41,19 +34,13 @@ const createDocument = async (req, res) => {
 };
 
 // Get all documents for user
-const getUserDocuments = async (req, res) => {
+const getAllDocuments = async (req, res) => {
   try {
-    const documents = await Document.find({
-      $or: [
-        { owner: req.user.id },
-        { 'collaborators.user': req.user.id },
-        { isPublic: true }
-      ]
-    })
-    .populate('owner', 'username email')
-    .populate('collaborators.user', 'username email')
-    .populate('lastModifiedBy', 'username')
-    .sort({ lastModified: -1 });
+    const documents = await Document.find({})
+      .populate('owner', 'username email')
+      .populate('collaborators.user', 'username email')
+      .populate('lastModifiedBy', 'username')
+      .sort({ lastModified: -1 });
 
     res.json(documents);
   } catch (error) {
@@ -61,6 +48,7 @@ const getUserDocuments = async (req, res) => {
     res.status(500).json({ message: 'Server error while fetching documents' });
   }
 };
+
 
 // Get single document
 const getDocument = async (req, res) => {
@@ -94,7 +82,7 @@ const getDocument = async (req, res) => {
 // Update document
 const updateDocument = async (req, res) => {
   try {
-    const { title, content, isPublic } = req.body;
+    const { content } = req.body;
     const document = await Document.findById(req.params.id);
 
     if (!document) {
@@ -116,9 +104,8 @@ const updateDocument = async (req, res) => {
     const updatedDocument = await Document.findByIdAndUpdate(
       req.params.id,
       {
-        title: title || document.title,
+        title: document.title,
         content: content !== undefined ? content : document.content,
-        isPublic: isPublic !== undefined ? isPublic : document.isPublic,
         lastModifiedBy: req.user.id
       },
       { new: true }
@@ -212,7 +199,7 @@ const addCollaborator = async (req, res) => {
 
 module.exports = {
   createDocument,
-  getUserDocuments,
+  getAllDocuments,
   getDocument,
   updateDocument,
   deleteDocument,

@@ -1,38 +1,72 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./DashBoard.css";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
 const Dashboard = () => {
-  const [documents, setDocuments] = useState([
-    { id: 1, title: "Project Plan" },
-    { id: 2, title: "Meeting Notes" },
-    { id: 3, title: "Design Doc" },
-  ]);
+  const [documents, setDocuments] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [newDocTitle, setNewDocTitle] = useState("");
   const navigate = useNavigate();
+
 
   const handleCreate = () => {
     setShowModal(true);
   };
 
-  const handleModalSubmit = (e) => {
+  const handleModalSubmit = async (e) => {
     e.preventDefault();
     if (!newDocTitle.trim()) {
       toast.error("Document name cannot be empty!");
       return;
     }
-    const newDoc = { id: Date.now(), title: newDocTitle };
-    setDocuments([...documents, newDoc]);
-    toast.info(`New document "${newDocTitle}" created!`);
-    setShowModal(false);
-    setNewDocTitle("");
+    const token = sessionStorage.getItem("token");
+    try {
+      const res = await fetch("http://localhost:5000/api/documents", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ title: newDocTitle, content: "" })
+      });
+      console.log(res)
+      const newDoc = await res.json();
+      setDocuments([...documents, newDoc]);
+      toast.success(`New document created!`);
+      setShowModal(false);
+      setNewDocTitle("");
+    } catch (err) {
+      toast.error(err.message);
+    }
   };
-
   const handleOpen = (id) => {
     navigate(`/editor/${id}`);
   };
+
+  useEffect(() => {
+    const fetchAllDocuments = async () => {
+      const token = sessionStorage.getItem("token");
+      try {
+        const res = await fetch("http://localhost:5000/api/documents", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!res.ok) {
+          throw new Error("Failed to fetch documents");
+        }
+
+        const data = await res.json();
+        console.log(data);
+        setDocuments(data);
+      } catch (err) {
+        toast.error(err.message);
+      }
+    };
+
+    fetchAllDocuments(); // Call the function here
+  }, []); // Empty dependency array: runs only once on mount
 
   return (
     <div className="dashboard-bg">
@@ -43,10 +77,10 @@ const Dashboard = () => {
         </button>
       </div>
       <div className="dashboard-cards">
-        {documents.map((doc) => (
-          <div key={doc.id} className="doc-card">
+        {documents?.map((doc) => (
+          <div key={doc._id} className="doc-card">
             <div className="doc-title">{doc.title}</div>
-            <button className="open-btn" onClick={() => handleOpen(doc.id)}>
+            <button className="open-btn" onClick={() => handleOpen(doc._id)}>
               Open
             </button>
           </div>

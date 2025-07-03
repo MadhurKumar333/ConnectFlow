@@ -40,7 +40,7 @@ const documentSchema = new mongoose.Schema({
   }],
   isPublic: {
     type: Boolean,
-    default: false
+    default: true
   },
   lastModified: {
     type: Date,

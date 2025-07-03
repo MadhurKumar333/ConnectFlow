@@ -8,17 +8,28 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    // Dummy validation and login simulation
-    if (email === "user@example.com" && password === "password123") {
-      toast.success("Login successful!");
-      navigate("/dashboard");
-    } else {
-        toast.error("Invalid credentials. Try user@example.com / password123");
-    }
-  };
+  const handleSubmit = async (e) => {
+      e.preventDefault();
+      
+      try {
+        const res = await fetch("http://localhost:5000/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        });
+        const data = await res.json();
+        if (res.ok) {
+          toast.success(`Login successful.`);
+          sessionStorage.setItem("token", data.token);
+          navigate("/dashboard");
+        } else {
+          toast.error(data.message || "Login failed");
+        }
+      } catch (err) {
+        console.log(err)
+        toast.error("Server error. Try again.");
+      }
+    };
 
   return (
     <div className="auth-bg">
