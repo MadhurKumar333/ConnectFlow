@@ -1,0 +1,75 @@
+.dashboard-bg {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+    padding: 2rem 0;
+  }
+  .dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 900px;
+    margin: 0 auto 2rem auto;
+    padding: 0 1rem;
+  }
+  .dashboard-header h2 {
+    color: #3a86ff;
+    font-size: 2rem;
+  }
+  .create-btn {
+    background: linear-gradient(90deg, #3a86ff 0%, #8338ec 100%);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.6rem 1.2rem;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+  }
+  .create-btn:hover {
+    background: linear-gradient(90deg, #8338ec 0%, #3a86ff 100%);
+    transform: scale(1.04);
+  }
+  .dashboard-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+  .doc-card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(58,134,255,0.08);
+    padding: 1.5rem 1.2rem;
+    flex: 1 1 250px;
+    min-width: 250px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: box-shadow 0.2s, transform 0.1s;
+  }
+  .doc-card:hover {
+    box-shadow: 0 8px 32px rgba(58,134,255,0.18);
+    transform: translateY(-2px) scale(1.01);
+  }
+  .doc-title {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: #222;
+    margin-bottom: 1rem;
+  }
+  .open-btn {
+    background: #3a86ff;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .open-btn:hover {
+    background: #8338ec;
+  }
+  
