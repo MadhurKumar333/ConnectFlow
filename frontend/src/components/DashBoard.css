@@ -72,4 +72,54 @@
   .open-btn:hover {
     background: #8338ec;
   }
+  .modal-bg {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+  }
+  .modal {
+    background: #fff;
+    border-radius: 12px;
+    padding: 2rem 2.5rem;
+    box-shadow: 0 8px 32px rgba(31,38,135,0.18);
+    display: flex;
+    flex-direction: column;
+    min-width: 300px;
+  }
+  .modal h3 {
+    margin-bottom: 1rem;
+    color: #3a86ff;
+    text-align: center;
+  }
+  .modal input {
+    padding: 0.7rem 1rem;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    margin-bottom: 1.5rem;
+    font-size: 1rem;
+  }
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+  }
+  .modal-actions button {
+    padding: 0.5rem 1.1rem;
+    border-radius: 8px;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  .modal-actions button[type="submit"] {
+    background: linear-gradient(90deg, #3a86ff 0%, #8338ec 100%);
+    color: #fff;
+  }
+  .modal-actions button[type="button"] {
+    background: #eee;
+    color: #333;
+  }
   
